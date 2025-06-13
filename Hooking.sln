@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36121.58 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hooking", "Hooking\Hooking.csproj", "{E4E2BC07-DEC3-4DA4-9CBA-C9F2D868AB8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E4E2BC07-DEC3-4DA4-9CBA-C9F2D868AB8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4E2BC07-DEC3-4DA4-9CBA-C9F2D868AB8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4E2BC07-DEC3-4DA4-9CBA-C9F2D868AB8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4E2BC07-DEC3-4DA4-9CBA-C9F2D868AB8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {68FCA9D2-7771-48E9-9A75-CB37F4D6FADF}
+	EndGlobalSection
+EndGlobal
