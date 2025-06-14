@@ -8,10 +8,23 @@ IntPtr processHandle = OpenProcess(0x0008 | 0x0020, 1, mauri.GetProcess().Id);
 // === Allocate code caves ===
 IntPtr godmodeCave = CreateCodeCave(processHandle, 100);
 IntPtr ammoCave = CreateCodeCave(processHandle, 100);
+IntPtr norecoilCave = CreateCodeCave(processHandle, 100);
 
 // === Detour Addresses ===
 IntPtr godmodeDetour = IntPtr.Add(client, 0x1C223);   // sub [ebx+4], esi
 IntPtr ammoDetour = IntPtr.Add(client, 0xC73EF);      // dec [eax]
+IntPtr recoilDetour = IntPtr.Add(client, 0xC2EC3);    // movss [esi+38], xmm2
+IntPtr rapidDetour = IntPtr.Add(client, 0xC73EA);     // mov [eax], ecx
+
+
+// == RAPIDFIRE == 
+
+byte[] rapidfire =
+{
+        0x90, 0x90, 0x90, 0x90, 0x90 // NOP 5 bytes
+};
+mauri.WriteBytes(rapidDetour, rapidfire);
+
 
 // === GODMODE ===
 byte[] godmodeCode =
@@ -23,6 +36,23 @@ mauri.WriteBytes(godmodeCave, godmodeCode);
 makeDetour(IntPtr.Add(godmodeCave, 5), IntPtr.Add(godmodeDetour, 5), 5);
 makeDetour(godmodeDetour, godmodeCave, 5);
 
+// === NO RECOIL ===
+byte[] norecoilCode = new byte[11];
+
+// Fill with 6 NOPs to cancel the movss
+for (int i = 0; i < 6; i++) norecoilCode[i] = 0x90;
+
+// Calculate jump back
+IntPtr returnAddress = IntPtr.Add(recoilDetour, 6);
+int jmpBackOffset = (int)returnAddress - (int)(norecoilCave + 10 + 1);
+
+// Append jump back
+norecoilCode[6] = 0xE9;
+BitConverter.GetBytes(jmpBackOffset).CopyTo(norecoilCode, 7);
+
+mauri.WriteBytes(norecoilCave, norecoilCode);
+makeDetour(recoilDetour, norecoilCave, 6);
+
 // === INFINITE AMMO ===
 byte[] ammoCode =
 {
@@ -33,16 +63,20 @@ mauri.WriteBytes(ammoCave, ammoCode);
 makeDetour(IntPtr.Add(ammoCave, 6), IntPtr.Add(ammoDetour, 6), 5);
 makeDetour(ammoDetour, ammoCave, 6);
 
-Console.WriteLine("Godmode and infinite ammo hooked.");
+Console.WriteLine("Godmode, infinite ammo, and no recoil hooked.");
 Console.ReadLine();
 
 // === Restore original instructions ===
-mauri.WriteBytes(godmodeDetour, "29 73 04 8B C6"); // sub [ebx+4], esi / mov eax, esi
-mauri.WriteBytes(ammoDetour, "FF 08 8D 44 24 1C"); // dec [eax], lea eax,[esp+1C]
+mauri.WriteBytes(godmodeDetour, "29 73 04 8B C6");      // sub [ebx+4], esi / mov eax, esi
+mauri.WriteBytes(ammoDetour, "FF 08 8D 44 24 1C");      // dec [eax], lea eax,[esp+1C]
+mauri.WriteBytes(recoilDetour, "F3 0F 11 56 38");       // movss [esi+38], xmm2
+mauri.WriteBytes(rapidDetour, "89 08"); // mov [eax], ecx
+
 
 // Free memory
 freeCodeCave(processHandle, godmodeCave);
 freeCodeCave(processHandle, ammoCave);
+freeCodeCave(processHandle, norecoilCave);
 CloseHandle(processHandle);
 
 Console.WriteLine("Restored original instructions and freed caves.");
